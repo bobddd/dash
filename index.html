@@ -100,7 +100,19 @@ var stimer=100;
 bImage = new Image(); b2Image = new Image(); 
 var nodown = 0;
 function clickfunc(){
+if (scene == "START"){
+	if (pmusic==1){
+		myMusic = new sound("audio/track" + String(tracknum) + ".mp3");
+		myMusic.play();
+	}
+	scene="M";
+}
+if (scene == "M"){
 
+pjump=1; pjumpV=pjumpVI;
+demo3ext+=Math.round(px/42)-5 + ",";
+		
+}
 if (scene == "EDIT"){
 	if (canvasX > 0 && canvasX < 800 && canvasY > -1 && canvasY < 40){
 		for (let i = 0; i < 20; i++){
@@ -804,7 +816,7 @@ if (editmusic==1){edT+=3.8;
 }
 }
 if (scene=="M"){
-if (respawn==2){//RESPAWN
+if (respawn==1){//RESPAWN
 	px=pxi; py=pyi; bxM=px-300; byM=py-220; bx=bxM; by=byM; pjump=0; grounded=1; aTimer=0;  spaceD=0; pdir=1;
 	pfallV=0; pjumpV=pjumpVI; speed=8;
 	for (let i = 0; i < boostA.length; i++){
