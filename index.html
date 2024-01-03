@@ -84,9 +84,9 @@ canvas.addEventListener("mousemove", function(e) {
 });
 
 //Defaults------------------------------
-var fps = 60;
-var rrate = Math.round(1000/fps);
-var myVar = setInterval(move,rrate);
+//var fps = 60;
+//var rrate = Math.round(1000/fps);
+//var myVar = setInterval(move,rrate);
 var myVar2 = setInterval(outprint,20); 
 var guion = 1; 
 
@@ -109,8 +109,10 @@ if (scene == "START"){
 }
 if (scene == "M"){
 
+if (grounded==1){
 pjump=1; pjumpV=pjumpVI;
 demo3ext+=Math.round(px/42)-5 + ",";
+}
 		
 }
 if (scene == "EDIT"){
@@ -123,16 +125,16 @@ if (scene == "EDIT"){
 	
 		if (editmusic==0){
 			myMusic2 = new sound("audio/track" + String(tracknum) + ".mp3"); 
-			myMusic2.play(); editmusic=1; edT=0; nodown=1; console.log("W");
+			myMusic2.play(); editmusic=1; edT=0; nodown=1; 
 		}
-		if (editmusic==1&&nodown==0){myMusic2.restart(); edT=0; console.log("L");}
+		if (editmusic==1&&nodown==0){myMusic2.restart(); edT=0; }
 	}
 	else{
 		for (let i = 0; i < 40; i++){
 			for (let z = 0; z < 20; z++){
 				if (canvasX>i*20&&canvasX<=i*20+20&&canvasY>z*20&&canvasY<=z*20+20){
 					lx=i+ebx/20; ly=z-13; 
-					if (ecurr==0){console.log(eblockstr); blockA.push(new block(lx,ly,eblockstr)); pta.push('blockA.push(new block('+lx+','+ly+',"'+eblockstr+'"));');}
+					if (ecurr==0){blockA.push(new block(lx,ly,eblockstr)); pta.push('blockA.push(new block('+lx+','+ly+',"'+eblockstr+'"));');}
 					if (ecurr==1){
 						if (erot==0){spikeA.push(new spike(lx,ly,"S",einv)); pta.push('spikeA.push(new spike('+lx+','+ly+',"S",' + einv + '));');}
 						if (erot==1){spikeA.push(new spike(lx,ly,"SL",einv)); pta.push('spikeA.push(new spike('+lx+','+ly+',"SL",' + "1" + '));');}
@@ -184,7 +186,7 @@ var boost = function(rx,ry,type,dir) {
 	if (this.dir==-1){this.y=42*this.ry;}
 	this.type=type;
 	this.Image = new Image();
-	this.boost=10; 
+	this.boost=0; 
 	this.used=0;
 	this.biy = 22; this.bib = 0; this.bip = 16; this.bify = 23; this.bifp = 18; this.bifb = 15; 
 	if (this.type=="orbY"){this.bT=this.biy;}
@@ -213,7 +215,7 @@ boost.prototype.draw = function() {
 	if (this.dir==1){
 		if (this.type=="floorY"||this.type=="floorP"||this.type=="floorB"){
 			if (px+10+pw-20>this.x+3&&px+10<this.x+3+42&&py+10+ph-20>this.y+10&&py+10<this.y+10){
-				inboostrange=1;
+				inboostrange=1; //console.log(this.bT);
 				if (this.type=="floorB"){pdir=-1; this.boost=1; spaceD=0;}
 				else{this.boost=1;}
 			}
@@ -222,7 +224,7 @@ boost.prototype.draw = function() {
 	if (this.dir==-1){
 		if (this.type=="floorB"){
 			if (px+10+pw-20>this.x+3&&px+10<this.x+3+42&&py+10<=this.y+17&&py+10>this.y){
-				console.log("W");  pdir=1; this.boost=-1; spaceD=0;
+				pdir=1; this.boost=-1; spaceD=0;
 			}
 		}//ctx.strokeRect(this.x+3-bx,this.y-by,42,12);
 	}
@@ -470,6 +472,7 @@ if (this.dir==-1){
 //Collision
 if (this.used==0){
 	if (px+10+pw-20>this.hx1&&px+10<this.hx1+this.hw1&&py+10+ph-20>this.hy1&&py+10<this.hy1+this.hh1){
+		
 		if (this.type=="Y"){this.used=1; pdir=-1; pjump=0; pjumpV=0; pfallV = 0;}
 		if (this.type=="B"){this.used=1; pdir=1; pjump=0; pjumpV=0; pfallV = 0;}
 	}
@@ -493,7 +496,7 @@ if (tracknum==0){//TEST TRACK
 
 if (tracknum==1){//TRACK 1
 {//0-20
-spikeA.push(new spike(6,6,"SS",1));
+spikeA.push(new boost(6,6,"floorY",1));
 blockA.push(new block(8,6,"R"));
 blockA.push(new block(9,6,"RL"));
 blockA.push(new block(10,6,"RL"));
@@ -694,7 +697,10 @@ var bx = px-300; var by = py-244; var bxM=bx; var byM=by; var pywhenG = py;
 var speed = 8; //8
 //--------------------------------------------------------------------
 
-function move() {//MOVE --- MOVE -- MOVE -- MOVE --- MOVE -- MOVE 
+var globalID;
+
+function repeatOften() {
+
 if (scene=="EDIT"){//EDITOR
 
 ctx.fillStyle = "#092196";
@@ -820,7 +826,7 @@ if (respawn==1){//RESPAWN
 	px=pxi; py=pyi; bxM=px-300; byM=py-220; bx=bxM; by=byM; pjump=0; grounded=1; aTimer=0;  spaceD=0; pdir=1;
 	pfallV=0; pjumpV=pjumpVI; speed=8;
 	for (let i = 0; i < boostA.length; i++){
-		boostA[i].boost=0;  boostA[i].used=0;  
+		boostA[i].boost=0;  boostA[i].used=0; 
 		if (boostA[i].type=="orbP"){boostA[i].bT=boostA[i].bip;}
 		if (boostA[i].type=="orbY"){boostA[i].bT=boostA[i].biy;}
 		if (boostA[i].type=="orbB"){boostA[i].bT=boostA[i].bib;}
@@ -1010,9 +1016,10 @@ if (guion == 1){
 		}
 	}
 }
+globalID = requestAnimationFrame(repeatOften);
+}
+globalID = requestAnimationFrame(repeatOften);
 
-
-}//End of FUNCTION
 
 var demo1ext = ""; var demo2ext = ""; var demo3ext = "";
 function outprint() {
