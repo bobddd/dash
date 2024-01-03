@@ -113,6 +113,7 @@ if (grounded==1){
 pjump=1; pjumpV=pjumpVI;
 demo3ext+=Math.round(px/42)-5 + ",";
 }
+cTimer=1;
 		
 }
 if (scene == "EDIT"){
@@ -229,10 +230,15 @@ boost.prototype.draw = function() {
 		}//ctx.strokeRect(this.x+3-bx,this.y-by,42,12);
 	}
 	
-	if (this.used==0&&this.type=="orbY"&&spaceD==1||this.used==0&&this.type=="orbB"&&spaceD==1||this.used==0&&this.type=="orbP"&&spaceD==1){
-		if (px+10+pw-20>this.x+4&&px+10<this.x+4+47&&py+10+ph-20>this.y-25&&py+10<this.y-25+55){
-			if (this.type=="orbY"||this.type=="orbP"){pywhenG=py; this.used=1; this.boost=1;  pjump=0; pjumpV=pjumpVI; pfallV=0;}
-			if (this.type=="orbB"){pywhenG=py; this.used=1; pdir=-pdir; this.boost=1*this.dir; pjump=0; pjumpV=pjumpVI; pfallV=0;}
+	//if (this.used==0&&this.type=="orbY"&&spaceD==1||this.used==0&&this.type=="orbB"&&spaceD==1||this.used==0&&this.type=="orbP"&&spaceD==1){
+	if (this.type=="orbY"||this.type=="orbB"||this.type=="orbP"){
+		if (this.used==0){
+			if (spaceD==1||cTimer>0){
+				if (px+10+pw-20>this.x+4&&px+10<this.x+4+47&&py+10+ph-20>this.y-25&&py+10<this.y-25+55){
+					if (this.type=="orbY"||this.type=="orbP"){pywhenG=py; this.used=1; this.boost=1;  pjump=0; pjumpV=pjumpVI; pfallV=0;}
+					if (this.type=="orbB"){pywhenG=py; this.used=1; pdir=-pdir; this.boost=1*this.dir; pjump=0; pjumpV=pjumpVI; pfallV=0;}
+				}
+			}
 		}
 	}
 
@@ -491,9 +497,8 @@ var portalA = [];
 var tracknum=1;
 
 if (tracknum==11){//TEST TRACK
-boostA.push(new boost(5,6,"floorY",1));
-boostA.push(new boost(13,6,"floorY",1));
-spikeA.push(new spike(19,6,"SS",1));
+boostA.push(new boost(10,4,"orbY",1));
+
 
 }
 
@@ -677,7 +682,7 @@ pw = 60; ph = 60;
 var pjump=0; var pjumpV=0; var pjumpVI = 20.5  
 var pfallV = 0; var grounded=0; var aTimer=0;
 var respawn = 0; var spaceD=0; var pdir=1; 
-var cmode="static"; var cmtimer=0;  var inboostrange=0;
+var cmode="static"; var cmtimer=0;  var inboostrange=0; var cTimer=0;
 
 {//EDITOR--------------------------------
 var lx = 0; var ly = 0; var ebx = 0; var ebxM = ebx; var eby = 0; var ecurr=0; var ecurr2=0;
@@ -686,7 +691,7 @@ var editmusic=0; var edT=0; var einv=1; var erot=0; var eblock = []; var eblocks
 }//--------------------------------------
 
 //QUICK CHANGE-----------------------------------------------------------------
-var showb=0; var pmusic = 0;
+var showb=0; var pmusic = 1;
 scene = "START"; var pxi=200; var pyi=244;  //*
 //pxi = 1668; var pyi = -100; scene = "M"; //<-- FORWARD TO
 var px = pxi; var py = pyi;
@@ -819,6 +824,8 @@ if (editmusic==1){edT+=3.8;
 }
 }
 if (scene=="M"){
+//Click Register
+if (cTimer>0){cTimer++; if (cTimer>10){cTimer=0;}}
 if (respawn==1){//RESPAWN
 	px=pxi; py=pyi; bxM=px-300; byM=py-220; bx=bxM; by=byM; pjump=0; grounded=1; aTimer=0;  spaceD=0; pdir=1;
 	pfallV=0; pjumpV=pjumpVI; speed=8;
@@ -1302,7 +1309,7 @@ function sound(src) {
 <source src="audio/track2.mp3" type="audio/mp3">
 <source src="audio/track3.mp3" type="audio/mp3">
 
-<img id="BGS" src="backgrounds/START.png" hidden></img>
+<img id="BGS" src="backgrounds/start.png" hidden></img>
 <img src="backgrounds/1.png" hidden></img>
 <img src="backgrounds/G1.png" hidden></img>
 <img src="backgrounds/2.png" hidden></img>
