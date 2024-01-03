@@ -490,13 +490,15 @@ var portalA = [];
 
 var tracknum=1;
 
-if (tracknum==0){//TEST TRACK
+if (tracknum==11){//TEST TRACK
+boostA.push(new boost(5,6,"floorY",1));
+boostA.push(new boost(13,6,"floorY",1));
+spikeA.push(new spike(19,6,"SS",1));
 
 }
 
 if (tracknum==1){//TRACK 1
 {//0-20
-spikeA.push(new boost(6,6,"floorY",1));
 blockA.push(new block(8,6,"R"));
 blockA.push(new block(9,6,"RL"));
 blockA.push(new block(10,6,"RL"));
@@ -535,7 +537,6 @@ blockA.push(new block(25,5,"LD"));
 blockA.push(new block(25,6,"LU"));
 blockA.push(new block(24,6,"RLU"));
 blockA.push(new block(23,6,"RLU"));
-spikeA.push(new spike(24,4,"SS",1));
 spikeA.push(new spike(25,4,"S",1));
 blockA.push(new block(27,4,"RD"));
 blockA.push(new block(27,5,"RUD"));
@@ -672,10 +673,6 @@ portalA.push(new portal(58,-4,"B",-1));
 }
 
 
-//blockA.push(new block(5,2,""));
-//boostA.push(new boost(5,3,"orbB",1));
-//spikeA.push(new spike(7,6,"S",1));
-
 pw = 60; ph = 60; 
 var pjump=0; var pjumpV=0; var pjumpVI = 20.5  
 var pfallV = 0; var grounded=0; var aTimer=0;
@@ -689,7 +686,7 @@ var editmusic=0; var edT=0; var einv=1; var erot=0; var eblock = []; var eblocks
 }//--------------------------------------
 
 //QUICK CHANGE-----------------------------------------------------------------
-var showb=0; var pmusic = 1;
+var showb=0; var pmusic = 0;
 scene = "START"; var pxi=200; var pyi=244;  //*
 //pxi = 1668; var pyi = -100; scene = "M"; //<-- FORWARD TO
 var px = pxi; var py = pyi;
@@ -830,7 +827,7 @@ if (respawn==1){//RESPAWN
 		if (boostA[i].type=="orbP"){boostA[i].bT=boostA[i].bip;}
 		if (boostA[i].type=="orbY"){boostA[i].bT=boostA[i].biy;}
 		if (boostA[i].type=="orbB"){boostA[i].bT=boostA[i].bib;}
-		if (boostA[i].type=="floorY"){boostA[i].bT=boostA[i].bify;}
+		if (boostA[i].type=="floorY"){boostA[i].bT=boostA[i].bify; console.log("W");}
 		if (boostA[i].type=="floorP"){boostA[i].bT=boostA[i].bifp;}
 		if (boostA[i].type=="floorB"){boostA[i].bT=boostA[i].bifb;}
 	}
@@ -1023,15 +1020,17 @@ globalID = requestAnimationFrame(repeatOften);
 
 var demo1ext = ""; var demo2ext = ""; var demo3ext = "";
 function outprint() {
+	if (guion==1){
 	//Demo 1 & 2
 	demo2ext="ctx.strokeRect(px+10-bx,py+10-by,pw-20,ph-20) " + " |ecurr: " + ecurr + " |ecurr2: " + ecurr2 + " |pywhenG: " + pywhenG + " |inboostrange: " + inboostrange;
 	demo1ext="|px: " + px + " |py: " + py + " |grounded: " + grounded + " |bx: " + bx.toFixed(1) + " |by: " + by.toFixed(1) + " |pdir: " + pdir;
-	if (guion == 1){document.getElementById("demo1").innerHTML = "|X: " + canvasX + "| Y: " + canvasY + "| Scene: " + scene; document.getElementById("demo1").innerHTML += demo1ext;}
-	if (guion == 1){document.getElementById("demo2").innerHTML = ""; document.getElementById("demo2").innerHTML += demo2ext;}
-	if (guion == 1){document.getElementById("demo3").innerHTML = ""; document.getElementById("demo3").innerHTML += demo3ext;}
+	document.getElementById("demo1").innerHTML = "|X: " + canvasX + "| Y: " + canvasY + "| Scene: " + scene; document.getElementById("demo1").innerHTML += demo1ext;
+	document.getElementById("demo2").innerHTML = ""; document.getElementById("demo2").innerHTML += demo2ext;
+	document.getElementById("demo3").innerHTML = ""; document.getElementById("demo3").innerHTML += demo3ext;
 	
 	//Print Out
 	document.getElementById("textprint").innerHTML = printout; 
+	}
 }
 
 function copytoclipboard(text) {const elem = document.createElement('textarea');elem.value = text;document.body.appendChild(elem);elem.select();document.execCommand('copy');document.body.removeChild(elem);}
