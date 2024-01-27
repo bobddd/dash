@@ -19,6 +19,8 @@ p.a {
 </canvas>
 
 </body>
+<img id="BGSimg" src="backgrounds/start.png" hidden></img>
+<img id="lineglow" src="objects/deco/lineglow.png" hidden></img>
 
 <script>
 var canvas = document.getElementById("myCanvas");
@@ -118,15 +120,45 @@ cTimer=1;
 }
 if (scene == "EDIT"){
 	if (canvasX > 0 && canvasX < 800 && canvasY > -1 && canvasY < 40){
+		if (canvasX<40){cext++; if (cext>1){cext=0;}}
 		for (let i = 0; i < 20; i++){
 			if (canvasX>i*40&&canvasX<=i*40+40){ecurr=i;}
 		}
+	}
+	else if (cext==1&&canvasX > -1 && canvasX < 81 && canvasY > 41 && canvasY < 361){
+		for (let i = 0; i < 2; i++){for (let z = 0; z < 8; z++){
+			if (canvasX > 0+40*i&&canvasX < 40+40*i && canvasY > 40+40*z&&canvasY < 40*2+40*z){
+				if (i==0&&z==0){eblock=["L"];}
+				if (i==0&&z==1){eblock=["R"];}
+				if (i==0&&z==2){eblock=["U"];}
+				if (i==0&&z==3){eblock=["D"];}
+				if (i==0&&z==4){eblock=["R","L"];}
+				if (i==0&&z==5){eblock=["U","D"];}
+				if (i==0&&z==6){eblock=["L","D"];}
+				if (i==0&&z==7){eblock=["U","L"];}
+				
+				if (i==1&&z==0){eblock=["R","D"];}
+				if (i==1&&z==1){eblock=["U","R"];}
+				if (i==1&&z==2){eblock=["R","L","U"];}
+				if (i==1&&z==3){eblock=["D","L","U"];}
+				if (i==1&&z==4){eblock=["D","L","R"];}
+				if (i==1&&z==5){eblock=["D","U","R"];}
+				if (i==1&&z==6){eblock=["R","L","U","D"];}
+				if (i==1&&z==7){eblock=[""];}
+				cextX = i; cextY = z;
+			}
+		}}
+		eblockstr = "";
+		if (eblock.includes("R")==true){eblockstr+="R";}
+		if (eblock.includes("L")==true){eblockstr+="L";}
+		if (eblock.includes("U")==true){eblockstr+="U";}
+		if (eblock.includes("D")==true){eblockstr+="D";}
 	}
 	else if (canvasX > 0 && canvasX < 41 && canvasY > 359 && canvasY < 401){
 	
 		if (editmusic==0){
 			myMusic2 = new sound("audio/track" + String(tracknum) + ".mp3"); 
-			myMusic2.play(); editmusic=1; edT=0; nodown=1; 
+			myMusic2.play(); editmusic=1; edT=ebx; nodown=1; 
 		}
 		if (editmusic==1&&nodown==0){myMusic2.restart(); edT=0; }
 	}
@@ -161,6 +193,9 @@ if (scene == "EDIT"){
 						if (einv==1&&erot==1){portalA.push(new portal(lx,ly,"B",-1)); pta.push('portalA.push(new portal('+lx+','+ly+',"B",'+'-1'+'));');}
 						if (einv==-1&&erot==0){portalA.push(new portal(lx,ly,"Y",1)); pta.push('portalA.push(new portal('+lx+','+ly+',"Y",'+'1'+'));');}
 						if (einv==-1&&erot==1){portalA.push(new portal(lx,ly,"Y",-1)); pta.push('portalA.push(new portal('+lx+','+ly+',"Y",'+'-1'+'));');}
+					}
+					if (ecurr==14){
+						portalA.push(new portal(lx,ly,"BA",1)); pta.push('portalA.push(new portal('+lx+','+ly+',"BA",'+'1'+'));');
 					}
 
 					printout="";
@@ -202,7 +237,10 @@ boost.prototype.draw = function() {
 	if (this.dir==-1){this.Image.src = 'objects/' + this.type + 'U.png';}
 	if (this.dir==-1&&this.type=="orbB"){this.Image.src = "objects/" + "orbB.png";}
 	
-	if (this.type=="floorY"||this.type=="floorP"||this.type=="floorB"){ctx.drawImage(this.Image,this.x-bx,this.y-by,346/7,146/7);}
+	if (this.type=="floorY"||this.type=="floorP"||this.type=="floorB"){
+		if (this.type=="floorB"&&this.dir==-1){ctx.drawImage(this.Image,this.x-bx,this.y-by+3,346/7,146/7);}
+		else{ctx.drawImage(this.Image,this.x-bx,this.y-by,346/7,146/7);}
+	}
 	
 	if (this.type=="orbY"||this.type=="orbB"||this.type=="orbP"){
 		if (this.used==0){ctx.drawImage(this.Image,this.x+2-bx,this.y-20-by,318/7,281/7);}
@@ -382,9 +420,7 @@ if (this.dir==-1){ctx.drawImage(this.eImage,this.x-bx,14+this.y-by,42,42);}
 //SIDE Collision
 if (this.dir==1&&px+10+pw-20>this.x&&px+10<this.x+42&&py+10+ph-20>this.y+5&&py+10<this.y+20+5){respawn=1;}
 if (this.dir==-1&&px+10+pw-20>this.x&&px+10<this.x+42&&py+10<this.y+15+20&&py+10+ph-20<this.y+15){respawn=1;}
-if (this.dir==-1&&pdir==1){
-	if (this.dir==-1&&px+10+pw-20>this.x&&px+10<this.x+42&&py+10+ph-20>this.y&&py+10<this.y+25){respawn=1;}
-}
+
 
 if (showb==1){
 	if (this.dir==1){
@@ -452,7 +488,7 @@ if (showb==1){
 var gearA = [];
 }//---------------------------------------------------------------
 {//PORTAL-----------------------------------------------------------
-var portal = function(rx,ry,type,dir) {//MARK
+var portal = function(rx,ry,type,dir,pan) {//MARK
 this.rx=rx;
 this.ry=ry; 
 this.x=209+42*this.rx;
@@ -462,6 +498,7 @@ this.type=type;
 this.dir=dir;
 this.eImage = new Image();
 this.used=0;
+this.pan=pan;
 if (this.dir==1){this.hx1 = this.x; this.hy1 = this.y; this.hw1 = 42; this.hh1 = 84;}
 if (this.dir==-1){this.hx1 = this.x; this.hy1 = this.y; this.hw1 = 84; this.hh1 = 42;}
 }
@@ -478,9 +515,13 @@ if (this.dir==-1){
 //Collision
 if (this.used==0){
 	if (px+10+pw-20>this.hx1&&px+10<this.hx1+this.hw1&&py+10+ph-20>this.hy1&&py+10<this.hy1+this.hh1){
-		
 		if (this.type=="Y"){this.used=1; pdir=-1; pjump=0; pjumpV=0; pfallV = 0;}
-		if (this.type=="B"){this.used=1; pdir=1; pjump=0; pjumpV=0; pfallV = 0;}
+		if (this.type=="B"){
+			this.used=1; pdir=1; pjump=0; pjumpV=0; pfallV = 0;
+			if (this.pan==1){camT=30; camD=-1;}
+		}
+		if (this.type=="BA"){this.used=1; pmode="ball";}
+		if (this.type=="N"){this.used=1; pmode="cube";}
 	}
 }
 	
@@ -494,17 +535,258 @@ var portalA = [];
 
 }//-----------------------------------------------------------
 
-var tracknum=1;
+var tracknum=2; var checkstart=0;
 
-if (tracknum==11){//TEST TRACK
-boostA.push(new boost(10,4,"orbY",1));
+if (tracknum==2){//TRACK 2 - Holst First Suite March
+boostA.push(new boost(3,6,"floorB",1));
+boostA.push(new boost(4,4,"floorB",-1));
+boostA.push(new boost(5,6,"floorB",1));
+boostA.push(new boost(6,4,"floorB",-1));
+boostA.push(new boost(7,6,"floorY",1));
+blockA.push(new block(3,3,"R"));
+blockA.push(new block(7,3,"L"));
+blockA.push(new block(6,3,"RL"));
+blockA.push(new block(5,3,"RL"));
+blockA.push(new block(4,3,"RL"));
+spikeA.push(new spike(17,6,"SS",1));
+spikeA.push(new spike(18,6,"S",1));
+spikeA.push(new spike(21,6,"SSL",1));
+blockA.push(new block(22,6,"R"));
+blockA.push(new block(23,5,"RD"));
+blockA.push(new block(23,6,"RLU"));
+blockA.push(new block(24,6,"LU"));
+blockA.push(new block(24,5,"LD"));
+spikeA.push(new spike(25,6,"SS",1));
+spikeA.push(new spike(26,6,"S",1));
+spikeA.push(new spike(27,6,"SS",1));
+platA.push(new platform(27,4,"R",1));
+platA.push(new platform(28,4,"RL",1));
+platA.push(new platform(29,4,"RL",1));
+
+blockA.push(new block(22,1,"R"));
+blockA.push(new block(23,1,"L"));
+spikeA.push(new spike(21,1,"SSL",1));
+spikeA.push(new spike(23,0,"SS",1));
+spikeA.push(new spike(23,2,"SS",-1));
+spikeA.push(new spike(56,-4,"SS",-1));
+spikeA.push(new spike(57,-4,"S",-1));
+spikeA.push(new spike(58,-4,"SS",-1));
+platA.push(new platform(56,-5,"R",-1));
+platA.push(new platform(57,-5,"RL",-1));
+platA.push(new platform(58,-5,"L",-1));
+
+
+platA.push(new platform(30,4,"L",1));
+spikeA.push(new spike(29,3,"SS",1));
+spikeA.push(new spike(30,3,"S",1));
+boostA.push(new boost(32,1,"orbY",1));
+blockA.push(new block(33,6,"RU"));
+blockA.push(new block(33,5,"RUD"));
+blockA.push(new block(33,4,"RUD"));
+blockA.push(new block(33,3,"RD"));
+blockA.push(new block(34,3,"RLD"));
+blockA.push(new block(35,3,"RLD"));
+blockA.push(new block(36,3,"RLD"));
+blockA.push(new block(37,3,"RLD"));
+blockA.push(new block(38,3,"RLD"));
+blockA.push(new block(39,3,"LD"));
+blockA.push(new block(39,4,"LUD"));
+blockA.push(new block(39,5,"LUD"));
+blockA.push(new block(39,6,"LU"));
+blockA.push(new block(38,6,"RLU"));
+blockA.push(new block(37,6,"RLU"));
+blockA.push(new block(36,6,"RLU"));
+blockA.push(new block(35,6,"RLU"));
+blockA.push(new block(34,6,"RLU"));
+blockA.push(new block(34,4,"RLUD"));
+blockA.push(new block(34,5,"RLUD"));
+blockA.push(new block(35,4,"RLUD"));
+blockA.push(new block(35,5,"RLUD"));
+blockA.push(new block(36,4,"RLUD"));
+blockA.push(new block(37,4,"RLUD"));
+blockA.push(new block(38,4,"RLUD"));
+blockA.push(new block(38,5,"RLUD"));
+blockA.push(new block(37,5,"RLUD"));
+blockA.push(new block(36,5,"RLUD"));
+spikeA.push(new spike(33,2,"SS",1));
+spikeA.push(new spike(34,2,"S",1));
+spikeA.push(new spike(35,2,"SS",1));
+boostA.push(new boost(37,2,"floorY",1));
+platA.push(new platform(40,1,"R",1));
+platA.push(new platform(41,1,"RL",1));
+platA.push(new platform(42,1,"RL",1));
+platA.push(new platform(43,1,"RL",1));
+platA.push(new platform(44,1,"L",1));
+spikeA.push(new spike(44,0,"SS",1));
+portalA.push(new portal(44,-2,"Y",1));
+blockA.push(new block(43,-4,"R"));
+blockA.push(new block(44,-4,"RL"));
+blockA.push(new block(45,-4,"RL"));
+blockA.push(new block(46,-4,"RL"));
+blockA.push(new block(47,-4,"RL"));
+blockA.push(new block(48,-4,"RL"));
+blockA.push(new block(49,-4,"RL"));
+blockA.push(new block(50,-4,"RL"));
+blockA.push(new block(51,-4,"L"));
+spikeA.push(new spike(51,-3,"SS",-1));
+spikeA.push(new spike(50,-3,"S",-1));
+platA.push(new platform(52,-2,"R",-1));
+platA.push(new platform(53,-2,"RL",-1));
+platA.push(new platform(54,-2,"RL",-1));
+platA.push(new platform(55,-2,"L",-1));
+spikeA.push(new spike(55,-1,"SS",-1));
+boostA.push(new boost(56,1,"orbB",1));
+blockA.push(new block(59,-2,"D"));
+blockA.push(new block(59,-1,"UD"));
+blockA.push(new block(59,0,"UD"));
+blockA.push(new block(59,1,"U"));
+spikeA.push(new spike(58,1,"SSL",1));
+spikeA.push(new spike(58,0,"SSL",1));
+spikeA.push(new spike(58,-1,"SSL",1));
+spikeA.push(new spike(58,-2,"SSL",1));
+blockA.push(new block(58,6,"RU"));
+blockA.push(new block(58,5,"RD"));
+blockA.push(new block(59,5,"RLD"));
+blockA.push(new block(60,5,"RLD"));
+blockA.push(new block(61,5,"RLD"));
+blockA.push(new block(62,5,"LD"));
+blockA.push(new block(62,6,"LU"));
+blockA.push(new block(61,6,"RLU"));
+blockA.push(new block(60,6,"RLU"));
+blockA.push(new block(59,6,"RLU"));
+boostA.push(new boost(62,4,"floorY",1));
+platA.push(new platform(65,4,"R",1));
+platA.push(new platform(66,4,"RL",1));
+platA.push(new platform(67,4,"RL",1));
+platA.push(new platform(68,4,"RL",1));
+platA.push(new platform(69,4,"L",1));
+boostA.push(new boost(67,3,"floorY",1));
+spikeA.push(new spike(69,3,"S",1));
+spikeA.push(new spike(61,1,"SS",-1));
+blockA.push(new block(61,0,""));
+gearA.push(new gear(64,6,"G1",1));
+portalA.push(new portal(71,3,"Y",-1));
+portalA.push(new portal(73,0,"B",-1));
+boostA.push(new boost(75,3,"orbB",1));
+blockA.push(new block(78,5,"LD"));
+blockA.push(new block(78,6,"LU"));
+blockA.push(new block(77,5,"RLD"));
+blockA.push(new block(76,5,"RD"));
+blockA.push(new block(77,6,"RLU"));
+blockA.push(new block(76,6,"RLU"));
+blockA.push(new block(75,6,"RL"));
+spikeA.push(new spike(75,5,"SS",1));
+spikeA.push(new spike(76,4,"SS",1));
+spikeA.push(new spike(77,4,"S",1));
+spikeA.push(new spike(78,4,"SS",1));
+blockA.push(new block(74,6,"RL"));
+blockA.push(new block(73,6,"RU"));
+blockA.push(new block(73,5,"D"));
+spikeA.push(new spike(73,4,"SS",1));
+spikeA.push(new spike(74,5,"S",1));
+boostA.push(new boost(77,0,"orbB",1));
+spikeA.push(new spike(77,-2,"SS",-1));
+spikeA.push(new spike(76,-2,"S",-1));
+spikeA.push(new spike(78,-2,"SS",-1));
+spikeA.push(new spike(79,-2,"S",-1));
+platA.push(new platform(76,-3,"R",-1));
+platA.push(new platform(77,-3,"RL",-1));
+platA.push(new platform(78,-3,"RL",-1));
+platA.push(new platform(79,-3,"L",-1));
+portalA.push(new portal(80,3,"Y",-1));
+portalA.push(new portal(82,-1,"B",-1));
+
+blockA.push(new block(83,6,"RU"));
+blockA.push(new block(83,5,"RUD"));
+blockA.push(new block(83,4,"RUD"));
+blockA.push(new block(83,3,"RUD"));
+blockA.push(new block(83,2,"RD"));
+blockA.push(new block(84,2,"RLD"));
+blockA.push(new block(85,2,"RLD"));
+blockA.push(new block(86,2,"RLD"));
+blockA.push(new block(87,2,"RLD"));
+blockA.push(new block(88,1,"RUD"));
+blockA.push(new block(88,0,"RD"));
+blockA.push(new block(85,6,"RLU"));
+blockA.push(new block(84,6,"RLU"));
+blockA.push(new block(86,6,"RLU"));
+blockA.push(new block(87,6,"RLU"));
+blockA.push(new block(88,6,"RLU"));
+blockA.push(new block(89,6,"RLU"));
+blockA.push(new block(90,6,"RLU"));
+blockA.push(new block(91,6,"RLU"));
+blockA.push(new block(92,6,"RLU"));
+blockA.push(new block(93,6,"LU"));
+blockA.push(new block(93,5,"LUD"));
+blockA.push(new block(93,4,"LUD"));
+blockA.push(new block(93,3,"LUD"));
+blockA.push(new block(93,2,"LUD"));
+blockA.push(new block(93,1,"LUD"));
+blockA.push(new block(93,0,"LD"));
+blockA.push(new block(92,0,"RLD"));
+blockA.push(new block(91,0,"RLD"));
+blockA.push(new block(90,0,"RLD"));
+blockA.push(new block(89,0,"RLD"));
+blockA.push(new block(88,2,"RLUD"));
+blockA.push(new block(89,1,"RLUD"));
+blockA.push(new block(89,2,"RLUD"));
+blockA.push(new block(90,1,"RLUD"));
+blockA.push(new block(91,1,"RLUD"));
+blockA.push(new block(92,1,"RLUD"));
+blockA.push(new block(92,2,"RLUD"));
+blockA.push(new block(91,2,"RLUD"));
+blockA.push(new block(90,2,"RLUD"));
+blockA.push(new block(90,3,"RLUD"));
+blockA.push(new block(91,3,"RLUD"));
+blockA.push(new block(92,3,"RLUD"));
+blockA.push(new block(92,4,"RLUD"));
+blockA.push(new block(92,5,"RLUD"));
+blockA.push(new block(91,5,"RLUD"));
+blockA.push(new block(91,4,"RLUD"));
+blockA.push(new block(90,4,"RLUD"));
+blockA.push(new block(90,5,"RLUD"));
+blockA.push(new block(89,5,"RLUD"));
+blockA.push(new block(89,4,"RLUD"));
+blockA.push(new block(89,3,"RLUD"));
+blockA.push(new block(88,3,"RLUD"));
+blockA.push(new block(88,4,"RLUD"));
+blockA.push(new block(88,5,"RLUD"));
+blockA.push(new block(87,5,"RLUD"));
+blockA.push(new block(87,4,"RLUD"));
+blockA.push(new block(87,3,"RLUD"));
+blockA.push(new block(86,3,"RLUD"));
+blockA.push(new block(86,4,"RLUD"));
+blockA.push(new block(86,5,"RLUD"));
+blockA.push(new block(85,5,"RLUD"));
+blockA.push(new block(85,4,"RLUD"));
+blockA.push(new block(85,3,"RLUD"));
+blockA.push(new block(84,3,"RLUD"));
+blockA.push(new block(84,4,"RLUD"));
+blockA.push(new block(84,5,"RLUD"));
+boostA.push(new boost(85,1,"floorY",1));
+spikeA.push(new spike(82,-4,"SS",-1));
+spikeA.push(new spike(83,-4,"S",-1));
+spikeA.push(new spike(84,-4,"SS",-1));
+platA.push(new platform(82,-5,"R",-1));
+platA.push(new platform(83,-5,"RL",-1));
+platA.push(new platform(84,-5,"L",-1));
+spikeA.push(new spike(82,-4,"SS",-1));
+spikeA.push(new spike(83,-4,"S",-1));
+spikeA.push(new spike(84,-4,"SS",-1));
+platA.push(new platform(82,-5,"R",-1));
+platA.push(new platform(83,-5,"RL",-1));
+platA.push(new platform(84,-5,"L",-1));
+spikeA.push(new spike(83,1,"SS",1));
+
+
 
 
 }
 
-if (tracknum==1){//TRACK 1
-{//0-20
-blockA.push(new block(8,6,"R"));
+if (tracknum==1){//TRACK 1 - Mahler 5 Scherzo Ending
+
+{//1
+blockA.push(new block(8,6,"R")); //1
 blockA.push(new block(9,6,"RL"));
 blockA.push(new block(10,6,"RL"));
 blockA.push(new block(11,6,"L"));
@@ -513,30 +795,30 @@ blockA.push(new block(13,6,"U"));
 spikeA.push(new spike(13,4,"SS",1));
 blockA.push(new block(15,6,"RU"));
 blockA.push(new block(15,5,"RUD"));
-blockA.push(new block(15,4,"RD"));
+blockA.push(new block(15,4,"RD")); //10
 blockA.push(new block(16,4,"RLD"));
 blockA.push(new block(17,4,"RLD"));
 blockA.push(new block(18,4,"RLD"));
 spikeA.push(new spike(17,3,"SS",1));
 spikeA.push(new spike(18,3,"S",1));
-
 blockA.push(new block(19,4,"RLD"));
 blockA.push(new block(20,4,"LD"));
 blockA.push(new block(20,5,"LUD"));
 blockA.push(new block(20,6,"LU"));
-blockA.push(new block(19,6,"RLU"));
-blockA.push(new block(18,6,"RLU"));
+blockA.push(new block(19,6,"RLU")); //20
+}
+
+{//2
+blockA.push(new block(18,6,"RLU")); //21
 blockA.push(new block(17,6,"RLU"));
 blockA.push(new block(16,6,"RLU"));
 blockA.push(new block(19,5,"RLUD"));
 blockA.push(new block(18,5,"RLUD"));
 blockA.push(new block(17,5,"RLUD"));
 blockA.push(new block(16,5,"RLUD"));
-}
-{//21-50
 blockA.push(new block(22,6,"RU"));
 blockA.push(new block(22,5,"RD"));
-blockA.push(new block(23,5,"RLD"));
+blockA.push(new block(23,5,"RLD")); //30
 blockA.push(new block(24,5,"RLD"));
 blockA.push(new block(25,5,"LD"));
 blockA.push(new block(25,6,"LU"));
@@ -546,8 +828,11 @@ spikeA.push(new spike(25,4,"S",1));
 blockA.push(new block(27,4,"RD"));
 blockA.push(new block(27,5,"RUD"));
 blockA.push(new block(27,6,"RU"));
-blockA.push(new block(28,4,"RLD"));
-blockA.push(new block(29,4,"RLD"));
+blockA.push(new block(28,4,"RLD")); //40
+}
+
+{//3
+blockA.push(new block(29,4,"RLD")); //41
 blockA.push(new block(30,4,"LD"));
 blockA.push(new block(30,5,"LUD"));
 blockA.push(new block(30,6,"LU"));
@@ -556,7 +841,7 @@ blockA.push(new block(29,6,"RLU"));
 blockA.push(new block(28,5,"RLUD"));
 blockA.push(new block(29,5,"RLUD"));
 boostA.push(new boost(29,3,"floorY",1));
-blockA.push(new block(33,6,"U"));
+blockA.push(new block(33,6,"U")); //50
 blockA.push(new block(33,5,"UD"));
 blockA.push(new block(33,4,"UD"));
 blockA.push(new block(33,3,"D"));
@@ -566,8 +851,11 @@ blockA.push(new block(35,5,"UD"));
 blockA.push(new block(35,4,"UD"));
 blockA.push(new block(35,6,"U"));
 spikeA.push(new spike(35,1,"SS",1));
-boostA.push(new boost(35,0,"orbP",1));
-blockA.push(new block(38,1,"RD"));
+boostA.push(new boost(35,0,"orbP",1)); //60
+}
+
+{//4
+blockA.push(new block(38,1,"RD")); //61
 blockA.push(new block(39,1,"RLD"));
 blockA.push(new block(40,1,"RLD"));
 blockA.push(new block(41,1,"RLD"));
@@ -606,7 +894,10 @@ spikeA.push(new spike(44,0,"SS",1));
 blockA.push(new block(44,1,"D"));
 blockA.push(new block(44,2,"UD"));
 blockA.push(new block(44,3,"UD"));
-blockA.push(new block(44,4,"RUD"));
+blockA.push(new block(44,4,"RUD")); //100
+}
+
+{//5
 blockA.push(new block(45,4,"RLD"));
 blockA.push(new block(46,4,"RLD"));
 blockA.push(new block(47,4,"RLD"));
@@ -619,7 +910,6 @@ boostA.push(new boost(47,3,"floorB",1));
 boostA.push(new boost(49,-1,"orbB",1));
 spikeA.push(new spike(45,3,"SS",1));
 spikeA.push(new spike(49,3,"SS",1));
-}
 blockA.push(new block(52,2,"RD"));
 blockA.push(new block(52,3,"RUD"));
 blockA.push(new block(52,4,"RUD"));
@@ -648,6 +938,9 @@ blockA.push(new block(55,5,"RLUD"));
 spikeA.push(new spike(50,-4,"SS",-1));
 spikeA.push(new spike(51,-4,"S",-1));
 spikeA.push(new spike(52,-4,"S",-1));
+}
+
+{//6
 spikeA.push(new spike(53,-4,"SS",-1));
 blockA.push(new block(50,-5,"R"));
 blockA.push(new block(51,-5,"RL"));
@@ -659,7 +952,6 @@ platA.push(new platform(60,0,"RL",1));
 platA.push(new platform(61,0,"RL",1));
 platA.push(new platform(62,0,"RL",1));
 platA.push(new platform(63,0,"L",1));
-
 spikeA.push(new spike(63,-1,"SS",1));
 spikeA.push(new spike(58,3,"SS",1));
 spikeA.push(new spike(59,3,"S",1));
@@ -675,25 +967,331 @@ blockA.push(new block(59,4,"RLD"));
 blockA.push(new block(59,5,"RLUD"));
 boostA.push(new boost(56,-1,"orbB",1));
 portalA.push(new portal(58,-4,"B",-1));
+platA.push(new platform(65,-2,"R",1));
+platA.push(new platform(66,-2,"RL",1));
+platA.push(new platform(67,-2,"RL",1));
+platA.push(new platform(68,-2,"RL",1));
+platA.push(new platform(69,-2,"L",1));
+boostA.push(new boost(65,-3,"floorP",1));
+boostA.push(new boost(68,-5,"orbP",1));
+spikeA.push(new spike(67,-3,"SS",1));
+spikeA.push(new spike(68,-3,"S",1));
+spikeA.push(new spike(69,-3,"SS",1));
+blockA.push(new block(71,-4,"RD"));
+blockA.push(new block(72,-4,"RLD"));
+blockA.push(new block(73,-4,"RLD"));
+blockA.push(new block(74,-4,"RLD"));
 }
 
+{//7
+blockA.push(new block(75,-4,"LD"));
+blockA.push(new block(75,-3,"LUD"));
+blockA.push(new block(75,-2,"LUD"));
+blockA.push(new block(75,-1,"LUD"));
+blockA.push(new block(75,0,"LUD"));
+blockA.push(new block(75,1,"LUD"));
+blockA.push(new block(75,2,"LUD"));
+blockA.push(new block(71,-3,"RUD"));
+blockA.push(new block(71,-2,"RUD"));
+blockA.push(new block(71,-1,"RUD"));
+blockA.push(new block(71,0,"RUD"));
+blockA.push(new block(71,1,"RUD"));
+blockA.push(new block(71,2,"RUD"));
+blockA.push(new block(72,-3,"RLUD"));
+blockA.push(new block(73,-3,"RLUD"));
+blockA.push(new block(74,-3,"RLUD"));
+blockA.push(new block(74,-2,"RLUD"));
+blockA.push(new block(73,-2,"RLUD"));
+blockA.push(new block(72,-2,"RLUD"));
+blockA.push(new block(72,-1,"RLUD"));
+blockA.push(new block(73,-1,"RLUD"));
+blockA.push(new block(74,-1,"RLUD"));
+blockA.push(new block(74,0,"RLUD"));
+blockA.push(new block(73,0,"RLUD"));
+blockA.push(new block(72,0,"RLUD"));
+blockA.push(new block(72,1,"RLUD"));
+blockA.push(new block(73,1,"RLUD"));
+blockA.push(new block(74,1,"RLUD"));
+blockA.push(new block(74,2,"RLUD"));
+blockA.push(new block(73,2,"RLUD"));
+blockA.push(new block(72,2,"RLUD"));
+
+blockA.push(new block(80,-3,"LD"));
+blockA.push(new block(79,-3,"RLD"));
+blockA.push(new block(78,-3,"RLD"));
+blockA.push(new block(77,-3,"RD"));
+blockA.push(new block(77,-2,"RUD"));
+blockA.push(new block(77,-1,"RUD"));
+blockA.push(new block(77,0,"RUD"));
+blockA.push(new block(77,1,"RUD"));
+}
+
+{//8
+blockA.push(new block(77,2,"RU"));
+blockA.push(new block(78,2,"RLU"));
+blockA.push(new block(79,2,"RLU"));
+blockA.push(new block(80,2,"LU"));
+blockA.push(new block(80,0,"LUD"));
+blockA.push(new block(80,1,"LUD"));
+blockA.push(new block(80,-2,"LUD"));
+blockA.push(new block(80,-1,"LUD"));
+blockA.push(new block(78,-2,"RLUD"));
+blockA.push(new block(79,-2,"RLUD"));
+blockA.push(new block(78,-1,"RLUD"));
+blockA.push(new block(79,-1,"RLUD"));
+blockA.push(new block(78,0,"RLUD"));
+blockA.push(new block(79,0,"RLUD"));
+blockA.push(new block(78,1,"RLUD"));
+blockA.push(new block(79,1,"RLUD"));
+spikeA.push(new spike(79,-4,"SS",1));
+spikeA.push(new spike(80,-4,"S",1));
+blockA.push(new block(99,-4,"RLD"));
+blockA.push(new block(98,-4,"RLD"));
+blockA.push(new block(97,-4,"RLD"));
+blockA.push(new block(96,-4,"RLD"));
+blockA.push(new block(96,-3,"RLUD"));
+blockA.push(new block(96,-2,"RLUD"));
+blockA.push(new block(97,-3,"RLUD"));
+blockA.push(new block(98,-3,"RLUD"));
+blockA.push(new block(99,-3,"RLUD"));
+blockA.push(new block(99,-2,"RLUD"));
+blockA.push(new block(98,-2,"RLUD"));
+blockA.push(new block(97,-2,"RLUD"));
+blockA.push(new block(96,-1,"RLUD"));
+blockA.push(new block(97,-1,"RLUD"));
+blockA.push(new block(98,-1,"RLUD"));
+blockA.push(new block(99,-1,"RLUD"));
+blockA.push(new block(99,0,"RLUD"));
+blockA.push(new block(98,0,"RLUD"));
+blockA.push(new block(97,0,"RLUD"));
+blockA.push(new block(96,0,"RLUD"));
+blockA.push(new block(89,-10,"R"));
+blockA.push(new block(90,-10,"RL"));
+}
+
+{//9
+blockA.push(new block(91,-10,"RL"));
+blockA.push(new block(92,-10,"L"));
+spikeA.push(new spike(92,-9,"SS",-1));
+spikeA.push(new spike(91,-9,"S",-1));
+spikeA.push(new spike(89,-9,"SS",-1));
+spikeA.push(new spike(90,-9,"SS",-1));
+boostA.push(new boost(88,-6,"orbB",1));
+boostA.push(new boost(86,-3,"floorB",1));
+spikeA.push(new spike(84,-3,"SS",1));
+boostA.push(new boost(82,-3,"floorB",1));
+
+blockA.push(new block(82,-2,"RD"));
+blockA.push(new block(82,0,"RUD"));
+blockA.push(new block(82,1,"RUD"));
+blockA.push(new block(82,2,"RU"));
+
+
+blockA.push(new block(88,0,"UD"));
+blockA.push(new block(88,1,"UD"));
+blockA.push(new block(88,2,"U"));
+spikeA.push(new spike(88,-2,"SS",1));
+spikeA.push(new spike(90,0,"SS",1));
+blockA.push(new block(90,1,"D"));
+blockA.push(new block(90,2,"U"));
+spikeA.push(new spike(93,-4,"S",1));
+platA.push(new platform(90,-3,"R",1));
+platA.push(new platform(91,-3,"RL",1));
+platA.push(new platform(92,-3,"RL",1));
+platA.push(new platform(93,-3,"L",1));
+blockA.push(new block(103,-3,"R"));
+blockA.push(new block(104,-3,"RLD"));
+blockA.push(new block(105,-3,"RLD"));
+blockA.push(new block(106,-3,"RLD"));
+blockA.push(new block(107,-3,"LD"));
+blockA.push(new block(107,-2,"LUD"));
+blockA.push(new block(107,-1,"LUD"));
+blockA.push(new block(107,0,"LUD"));
+blockA.push(new block(107,1,"LU"));
+blockA.push(new block(106,1,"RLU"));
+blockA.push(new block(105,1,"RLU"));
+blockA.push(new block(104,1,"RU"));
+blockA.push(new block(104,0,"RUD"));
+blockA.push(new block(104,-1,"RUD"));
+blockA.push(new block(104,-2,"RUD"));
+blockA.push(new block(105,-2,"RLUD"));
+blockA.push(new block(106,-2,"RLUD"));
+blockA.push(new block(106,-1,"RLUD"));
+blockA.push(new block(105,-1,"RLUD"));
+blockA.push(new block(105,0,"RLUD"));
+blockA.push(new block(106,0,"RLUD"));
+spikeA.push(new spike(103,-2,"SS",-1));
+spikeA.push(new spike(107,-4,"SS",1));
+portalA.push(new portal(102,-7,"B",1,1));
+spikeA.push(new spike(97,-5,"SS",1));
+spikeA.push(new spike(98,-5,"S",1));
+spikeA.push(new spike(99,-5,"S",1));
+spikeA.push(new spike(100,-5,"SS",1));
+boostA.push(new boost(98,-7,"orbB",1));
+platA.push(new platform(98,-10,"R",-1));
+platA.push(new platform(99,-10,"RL",-1));
+}
+
+{//10
+platA.push(new platform(100,-10,"RL",-1));
+platA.push(new platform(101,-10,"RL",-1));
+platA.push(new platform(102,-10,"L",-1));
+spikeA.push(new spike(101,-9,"SS",-1));
+spikeA.push(new spike(102,-9,"S",-1));
+blockA.push(new block(95,-4,"RD"));
+blockA.push(new block(95,-3,"RUD"));
+blockA.push(new block(95,-2,"RUD"));
+blockA.push(new block(95,-1,"RUD"));
+blockA.push(new block(95,0,"RUD"));
+blockA.push(new block(95,1,"RU"));
+blockA.push(new block(96,1,"RLU"));
+blockA.push(new block(97,1,"RLU"));
+blockA.push(new block(98,1,"RLU"));
+blockA.push(new block(99,1,"RLU"));
+blockA.push(new block(100,1,"LU"));
+blockA.push(new block(100,0,"LUD"));
+blockA.push(new block(100,-1,"LUD"));
+blockA.push(new block(100,-2,"LUD"));
+blockA.push(new block(100,-3,"LUD"));
+blockA.push(new block(100,-4,"LD"));
+blockA.push(new block(109,-2,"RUD"));
+blockA.push(new block(109,-1,"RUD"));
+blockA.push(new block(109,0,"RU"));
+blockA.push(new block(110,0,"RLU"));
+blockA.push(new block(111,0,"RLU"));
+blockA.push(new block(110,-3,"RLD"));
+blockA.push(new block(111,-3,"RLD"));
+blockA.push(new block(112,-3,"RLD"));
+blockA.push(new block(113,-3,"RLD"));
+blockA.push(new block(114,-3,"RLD"));
+blockA.push(new block(115,-3,"LD"));
+blockA.push(new block(115,-2,"LUD"));
+blockA.push(new block(115,-1,"LUDR"));
+blockA.push(new block(115,0,"LUR"));
+blockA.push(new block(114,0,"RLU"));
+blockA.push(new block(113,0,"RLU"));
+blockA.push(new block(112,0,"RLU"));
+blockA.push(new block(110,-2,"RLUD"));
+blockA.push(new block(110,-1,"RLUD"));
+}
+
+{//11
+blockA.push(new block(111,-2,"RLUD"));
+blockA.push(new block(112,-2,"RLUD"));
+blockA.push(new block(113,-2,"RLUD"));
+blockA.push(new block(114,-2,"RLUD"));
+blockA.push(new block(114,-1,"RLUD"));
+blockA.push(new block(113,-1,"RLUD"));
+blockA.push(new block(112,-1,"RLUD"));
+blockA.push(new block(111,-1,"RLUD"));
+blockA.push(new block(109,-3,"RD"));
+
+spikeA.push(new spike(111,-4,"SS",1));
+spikeA.push(new spike(112,-4,"S",1));
+
+blockA.push(new block(117,-6,"R"));
+blockA.push(new block(118,-6,"RL"));
+blockA.push(new block(119,-6,"RL"));
+blockA.push(new block(120,-6,"RL"));
+blockA.push(new block(121,-6,"RL"));
+blockA.push(new block(122,-6,"RL"));
+blockA.push(new block(123,-6,"RL"));
+blockA.push(new block(124,-6,"RL"));
+blockA.push(new block(125,-6,"L"));
+spikeA.push(new spike(118,-5,"SS",-1));
+spikeA.push(new spike(119,-5,"S",-1));
+spikeA.push(new spike(120,-5,"SS",-1));
+spikeA.push(new spike(124,-1,"SS",1));
+spikeA.push(new spike(125,-1,"S",1));
+spikeA.push(new spike(126,-1,"SS",1));
+platA.push(new platform(124,0,"R",1));
+platA.push(new platform(125,0,"RL",1));
+platA.push(new platform(126,0,"L",1));
+}
+portalA.push(new portal(83,-6,"B",-1));
+
+portalA.push(new portal(115,-5,"BA",1));
+blockA.push(new block(116,-1,"RLD"));
+blockA.push(new block(117,-1,"RLD"));
+blockA.push(new block(118,-1,"RLD"));
+blockA.push(new block(119,-1,"RLD"));
+blockA.push(new block(116,0,"RLU"));
+blockA.push(new block(117,0,"RLU"));
+blockA.push(new block(118,0,"RLU"));
+blockA.push(new block(119,0,"RLU"));
+blockA.push(new block(120,0,"RLU"));
+blockA.push(new block(121,0,"RLU"));
+blockA.push(new block(120,-1,"RLD"));
+blockA.push(new block(121,-1,"RLD"));
+blockA.push(new block(122,-1,"LD"));
+blockA.push(new block(122,0,"LU"));
+spikeA.push(new spike(127,-6,"SS",-1));
+spikeA.push(new spike(128,-6,"S",-1));
+spikeA.push(new spike(129,-6,"SS",-1));
+platA.push(new platform(127,-7,"R",-1));
+platA.push(new platform(128,-7,"RL",-1));
+platA.push(new platform(129,-7,"L",-1));
+
+blockA.push(new block(130,-1,"LD"));
+blockA.push(new block(130,0,"LU"));
+blockA.push(new block(129,0,"RLU"));
+blockA.push(new block(128,0,"RU"));
+blockA.push(new block(128,-1,"RD"));
+blockA.push(new block(129,-1,"RLD"));
+spikeA.push(new spike(73,-5,"SS",1));
+
+
+spikeA.push(new spike(132,-2,"SSL",1));
+
+blockA.push(new block(133,-2,"L"));
+spikeA.push(new spike(133,-3,"SS",1));
+
+blockA.push(new block(131,-5,"R"));
+blockA.push(new block(132,-6,"RD"));
+blockA.push(new block(132,-5,"RLU"));
+blockA.push(new block(133,-7,"RD"));
+blockA.push(new block(134,-7,"RLD"));
+blockA.push(new block(135,-7,"RLD"));
+blockA.push(new block(136,-7,"LD"));
+blockA.push(new block(136,-6,"LUD"));
+blockA.push(new block(136,-5,"LU"));
+blockA.push(new block(135,-5,"RLU"));
+blockA.push(new block(134,-5,"RLU"));
+blockA.push(new block(133,-5,"RLU"));
+blockA.push(new block(133,-6,"RLUD"));
+blockA.push(new block(134,-6,"RLUD"));
+blockA.push(new block(135,-6,"RLUD"));
+spikeA.push(new spike(136,-4,"SS",-1));
+platA.push(new platform(135,-1,"R",1));
+platA.push(new platform(136,-1,"RL",1));
+platA.push(new platform(137,-1,"RL",1));
+platA.push(new platform(138,-1,"RL",1));
+platA.push(new platform(139,-1,"L",1));
+boostA.push(new boost(139,-2,"floorB",1));
+boostA.push(new boost(140,-5,"orbB",1));
+boostA.push(new boost(143,-2,"orbB",1));
+
+}
 
 pw = 60; ph = 60; 
 var pjump=0; var pjumpV=0; var pjumpVI = 20.5  
 var pfallV = 0; var grounded=0; var aTimer=0;
 var respawn = 0; var spaceD=0; var pdir=1; 
 var cmode="static"; var cmtimer=0;  var inboostrange=0; var cTimer=0;
+var pmode="cube"; var camT = 0; var camD = 0;
 
 {//EDITOR--------------------------------
-var lx = 0; var ly = 0; var ebx = 0; var ebxM = ebx; var eby = 0; var ecurr=0; var ecurr2=0;
+var lx = 0; var ly = 0; var ebx = 800; if (blockA.length==0){ebx=0;}
+var ebxM = ebx; var eby = 0; var ecurr=0; var ecurr2=0;
 var e2A = ["","R","L","U","D","RU","LU","LD","RD","RL","UD","LUD","RLU","RLD","RUD","RLUD"];
 var editmusic=0; var edT=0; var einv=1; var erot=0; var eblock = []; var eblockstr = "";
+var cext=0; var cextX = 0; var cextY = 0;
 }//--------------------------------------
 
 //QUICK CHANGE-----------------------------------------------------------------
 var showb=0; var pmusic = 1;
 scene = "START"; var pxi=200; var pyi=244;  //*
-//pxi = 1668; var pyi = -100; scene = "M"; //<-- FORWARD TO
+if (checkstart==1){pxi = 4498; var pyi = -200; scene = "M"; pmusic=0;} //<-- FORWARD TO
 var px = pxi; var py = pyi;
 var bx = px-300; var by = py-244; var bxM=bx; var byM=by; var pywhenG = py;
 var speed = 8; //8
@@ -702,22 +1300,20 @@ var speed = 8; //8
 var globalID;
 
 function repeatOften() {
-
 if (scene=="EDIT"){//EDITOR
-
 ctx.fillStyle = "#092196";
 ctx.fillRect(0,0,800,400);
 
 if (ebx < ebxM){if (ebxM - ebx <= 0.01){ebx = ebxM;}else{ebx+=(ebxM-ebx)/(5);}}	
 if (ebx > ebxM){if (ebx - ebxM <= 0.01){ebx = ebxM;}else{ebx-=(ebx-ebxM)/(5);}}
 
-for (let i = 0; i < 100; i++){//Draw Grid
+for (let i = 0; i < 200; i++){//Draw Grid
 	ctx.font = "700 20px Arial"; ctx.fillStyle = "white"; ctx.textAlign = "center";
 	ctx.fillRect(20*i-ebx,0,1,400);
-	ctx.fillRect(0-ebx,20*i,2000,1);
+	ctx.fillRect(0-ebx,20*i,4000,1);
 }
 
-for (let i = 0; i < 100; i++){for (let z = 0; z < 20; z++){
+for (let i = 0; i < 200; i++){for (let z = 0; z < 20; z++){
 	ctx.font = "700 6px Arial"; ctx.fillStyle = "white"; ctx.textAlign = "center";
 	if (i%5==0){ctx.fillText(i+","+(z-13),10+20*i-ebx,20-5+20*z);}
 }}
@@ -803,6 +1399,12 @@ for (let i = 0; i < portalA.length; i++){
 	if (portalA[i].type=="B"&&portalA[i].dir==1){
 		ctx.drawImage(eportalB,-5+lx*20-ebx,(ly+13)*20,30,40);
 	}
+	if (portalA[i].type=="BA"&&portalA[i].dir==1){
+		ctx.drawImage(eportalBA,-5+lx*20-ebx,(ly+13)*20,30,40);
+	}
+	if (portalA[i].type=="N"&&portalA[i].dir==1){
+		ctx.drawImage(eportalN,-5+lx*20-ebx,(ly+13)*20,30,40);
+	}
 }
 
 ctx.drawImage(etab,0,0,800,400);
@@ -818,6 +1420,39 @@ if (eblock.includes("R")==false){ctx.fillRect(30,10,2,20);}
 if (eblock.includes("U")==false){ctx.fillRect(10,10,20,2);}
 if (eblock.includes("D")==false){ctx.fillRect(10,30,22,2);}
 
+if (cext==1){
+	ctx.drawImage(ecubeEXT,0,0,800,400);
+
+	for (let z = 0; z < 2; z++){for (let i = 0; i < 8; i++){
+		ctx.fillStyle="white";
+		ctx.fillRect(10+40*z,50+40*i,2,20);
+		ctx.fillRect(30+40*z,50+40*i,2,20);
+		ctx.fillRect(10+40*z,50+40*i,20,2);
+		ctx.fillRect(10+40*z,70+40*i,22,2);
+	}}
+
+	ctx.fillStyle="black"; 
+	ctx.fillRect(9,49,4,24); //L
+	ctx.fillRect(9+20,49+40,4,24); //R
+	ctx.fillRect(9,49+40*2,24,4); //U
+	ctx.fillRect(9,69+40*3,24,4); //D
+
+	ctx.fillRect(9,49+40*4,4,24); ctx.fillRect(9+20,49+40*4,4,24);
+	ctx.fillRect(9,49+40*5,24,4); ctx.fillRect(9,69+40*5,24,4);
+	ctx.fillRect(9,49+40*6,4,24); ctx.fillRect(9,69+40*6,24,4);
+	ctx.fillRect(9,49+40*7,4,24); ctx.fillRect(9,49+40*7,24,4);
+
+	ctx.fillRect(9+40,49+40,24,4); ctx.fillRect(9+20+40,49+40,4,24);
+	ctx.fillRect(9+20+40,49,4,24); ctx.fillRect(9+40,69,24,4);
+
+	ctx.fillRect(9+40,49+40*2,4,24); ctx.fillRect(9+20+40,49+40*2,4,24); ctx.fillRect(9+40,49+40*2,24,4);
+	ctx.fillRect(9+40,49+40*3,4,24);  ctx.fillRect(9+40,49+40*3,24,4); ctx.fillRect(9+40,69+40*3,24,4);
+	ctx.fillRect(9+40,49+40*4,4,24); ctx.fillRect(9+20+40,49+40*4,4,24); ctx.fillRect(9+40,69+40*4,24,4);
+	ctx.fillRect(9+40,49+40*5,24,4); ctx.fillRect(9+40,69+40*5,24,4); ctx.fillRect(9+20+40,49+40*5,4,24);
+	ctx.fillRect(9+40,49+40*6,24,4); ctx.fillRect(9+40,69+40*6,24,4); ctx.fillRect(9+20+40,49+40*6,4,24); ctx.fillRect(9+40,49+40*6,4,24); 
+	ctx.drawImage(etabC,0+cextX*40,40+cextY*40,800,400);
+}
+
 if (editmusic==1){edT+=3.8;
 	ctx.fillStyle = "yellow"; 
 	ctx.fillRect(0-ebx+edT,82,1,400);
@@ -827,14 +1462,14 @@ if (scene=="M"){
 //Click Register
 if (cTimer>0){cTimer++; if (cTimer>10){cTimer=0;}}
 if (respawn==1){//RESPAWN
-	px=pxi; py=pyi; bxM=px-300; byM=py-220; bx=bxM; by=byM; pjump=0; grounded=1; aTimer=0;  spaceD=0; pdir=1;
+	pmode="cube"; px=pxi; py=pyi; bxM=px-300; byM=py-220; bx=bxM; by=byM; pjump=0; grounded=1; aTimer=0;  spaceD=0; pdir=1;
 	pfallV=0; pjumpV=pjumpVI; speed=8;
 	for (let i = 0; i < boostA.length; i++){
 		boostA[i].boost=0;  boostA[i].used=0; 
 		if (boostA[i].type=="orbP"){boostA[i].bT=boostA[i].bip;}
 		if (boostA[i].type=="orbY"){boostA[i].bT=boostA[i].biy;}
 		if (boostA[i].type=="orbB"){boostA[i].bT=boostA[i].bib;}
-		if (boostA[i].type=="floorY"){boostA[i].bT=boostA[i].bify; console.log("W");}
+		if (boostA[i].type=="floorY"){boostA[i].bT=boostA[i].bify;}
 		if (boostA[i].type=="floorP"){boostA[i].bT=boostA[i].bifp;}
 		if (boostA[i].type=="floorB"){boostA[i].bT=boostA[i].bifb;}
 	}
@@ -851,14 +1486,17 @@ if (respawn==1){//RESPAWN
 
 {//Camera-----------------------------------------------
 bxM=px-300;
-if (pywhenG<150){byM=pywhenG-220;}
-else{byM=0;}
 
-//if (cmode=="pan"){byM=py-220;}
-//if (cmode=="static"){byM=0;}
+if (camT>0&&grounded==0){
+	camT-=1;
+	if (camD==-1){byM+=20;}
+}
+else{camT=0;
+	if (pywhenG<150){byM=pywhenG-220;}
+	else{byM=0;}
+}
 
-//byM=py-170
-//byM=py-220;
+
 if (bx < bxM){if (bxM - bx <= 0.01){bx = bxM;}else{bx+=(bxM-bx)/(5);}}	
 if (bx > bxM){if (bx - bxM <= 0.01){bx = bxM;}else{bx-=(bx-bxM)/(5);}}
 if (by < byM){if (byM - by <= 0.01){by = byM;}else{by+=(byM-by)/(20);}}	
@@ -871,7 +1509,7 @@ if (respawn==0){
 		if (pdir==-1){py-=pfallV; pfallV+=1;}
 	}
 	
-	if (grounded==1&&spaceD==1&&inboostrange==0){
+	if (pmode=="cube"&&grounded==1&&spaceD==1&&inboostrange==0){
 		 pjump=1; pjumpV=pjumpVI;
 	}
 	px+=speed;
@@ -880,6 +1518,7 @@ if (respawn==0){
 		if (pdir==1){py-=pjumpV;} if (pdir==-1){py+=pjumpV;}
 		pjumpV-=1;
 		if (pjumpV<0){pjump=0; pjumpV=pjumpVI;}
+		console.log(pjumpV);
 	}
 }
 }//-----------------------------------------------
@@ -890,9 +1529,6 @@ for (let x = -1; x < 5; x++){ctx.drawImage(bImage,(354/1.5*x)-10-bx/20,0,354/1.5
 b2Image.src = "backgrounds/G" + tracknum + ".png";
 for (let x = -1; x < 40; x++){ctx.drawImage(b2Image,0-bx+800*x,23-by,800,400);}
 
-//ctx.fillStyle = "#52030f";
-//ctx.fillRect(0,294-by,800,400);
-
 ctx.globalAlpha=1-stimer/100;
 ctx.fillStyle = "white"; //Line
 ctx.fillRect(0,294.5-by,800,2);
@@ -901,19 +1537,44 @@ ctx.globalAlpha=1;
 }//-----------------------------------------------
 {//Player-----------------------------------------------
 ctx.globalAlpha=1-stimer/100;
-if (grounded==1){ctx.drawImage(p1,px-bx,py-by,pw,ph); aTimer=0;}
-else if (grounded==0){aTimer+=1;
-	if (aTimer<1){ctx.drawImage(p2,px-bx,py-by,pw,ph);}
-	else if (aTimer<2){ctx.drawImage(p3,px-bx,py-by,pw,ph);}
-	else if (aTimer<3){ctx.drawImage(p4,px-bx,py-by,pw,ph);}
-	else if (aTimer<4){ctx.drawImage(p5,px-bx,py-by,pw,ph);}
-	else if (aTimer<5){ctx.drawImage(p6,px-bx,py-by,pw,ph);}
-	else if (aTimer<6){ctx.drawImage(p7,px-bx,py-by,pw,ph);}
-	else if (aTimer<7){ctx.drawImage(p8,px-bx,py-by,pw,ph);}
+if (pmode=="cube"){
+	if (grounded==1){ctx.drawImage(p1,px-bx,py-by,pw,ph); aTimer=0;}
+	else if (grounded==0){aTimer+=1;
+		if (aTimer<1){ctx.drawImage(p2,px-bx,py-by,pw,ph);}
+		else if (aTimer<2){ctx.drawImage(p3,px-bx,py-by,pw,ph);}
+		else if (aTimer<3){ctx.drawImage(p4,px-bx,py-by,pw,ph);}
+		else if (aTimer<4){ctx.drawImage(p5,px-bx,py-by,pw,ph);}
+		else if (aTimer<5){ctx.drawImage(p6,px-bx,py-by,pw,ph);}
+		else if (aTimer<6){ctx.drawImage(p7,px-bx,py-by,pw,ph);}
+		else if (aTimer<7){ctx.drawImage(p8,px-bx,py-by,pw,ph);}
+		else{ctx.drawImage(p1,px-bx,py-by,pw,ph);}
+		if (aTimer>=8){aTimer=0;}
+	}
 	else{ctx.drawImage(p1,px-bx,py-by,pw,ph);}
-	if (aTimer>=8){aTimer=0;}
 }
-else{ctx.drawImage(p1,px-bx,py-by,pw,ph);}
+if (pmode=="ball"){
+	//if (grounded==1){ctx.drawImage(pb1,px-bx,py-by,pw,ph); aTimer=0;}
+	if (pdir==1){aTimer+=0.5;}else{aTimer-=0.5;}
+	
+	if (pdir==1){
+		if (aTimer<1){ctx.drawImage(pb2,px-bx,py-by-3,pw,ph);}
+		else if (aTimer<2){ctx.drawImage(pb3,px-bx,py-by-3,pw,ph);}
+		else if (aTimer<3){ctx.drawImage(pb4,px-bx,py-by-3,pw,ph);}
+		else if (aTimer<4){ctx.drawImage(pb5,px-bx,py-by-3,pw,ph);}
+		else if (aTimer<5){ctx.drawImage(pb6,px-bx,py-by-3,pw,ph);}
+		else{ctx.drawImage(pb1,px-bx,py-by-3,pw,ph);}
+		if (aTimer>=6){aTimer=0;} if (aTimer<0){aTimer=6;}
+	}
+	if (pdir==-1){
+		if (aTimer<1){ctx.drawImage(pb2,px-bx,py-by+3,pw,ph);}
+		else if (aTimer<2){ctx.drawImage(pb3,px-bx,py-by+3,pw,ph);}
+		else if (aTimer<3){ctx.drawImage(pb4,px-bx,py-by+3,pw,ph);}
+		else if (aTimer<4){ctx.drawImage(pb5,px-bx,py-by+3,pw,ph);}
+		else if (aTimer<5){ctx.drawImage(pb6,px-bx,py-by+3,pw,ph);}
+		else{ctx.drawImage(pb1,px-bx,py-by+3,pw,ph);}
+		if (aTimer>=6){aTimer=0;} if (aTimer<0){aTimer=6;}
+	}
+}
 ctx.globalAlpha=1;
 if (showb==1){
 	//Hitbox
@@ -939,14 +1600,14 @@ for(var i = 0; i < blockA.length; i++) {
 }
 for(var i = 0; i < platA.length; i++) {
 	platA[i].draw();
-	if (platA[i].dir==1){
+	if (pdir==1&&platA[i].dir==1){
 		if (px+10+pw-20>platA[i].x&&px+10<platA[i].x+42&&py+10+ph-20>platA[i].y-20&&py+10<=platA[i].y-20+20){//TOP
 			grounded=1; py=platA[i].y-50; pfallV=0; pywhenG=py;
 		}
 	}
-	if (platA[i].dir==-1){
+	if (pdir==-1&&platA[i].dir==-1){
 		if (px+10+pw-20>platA[i].x&&px+10<platA[i].x+42&&py+10+ph-20>platA[i].y+40&&py+10<=platA[i].y+40+20){
-			grounded=1; py=platA[i].y+32; pfallV=0; pywhenG=py;
+			grounded=1; py=platA[i].y+34; pfallV=0; pywhenG=py;
 		}
 	}
 	//ctx.strokeRect(this.x-bx,this.y+40-by,42,20);
@@ -988,7 +1649,7 @@ for (let x = -1; x < 4; x++){ctx.drawImage(bImage,(354/1.5*x)-10-bx/20,0,354/1.5
 b2Image.src = "backgrounds/G" + tracknum + ".png"; 
 for (let x = -1; x < 3; x++){ctx.drawImage(b2Image,0-bx+800*x,23-by,800,400);}
 }
-ctx.drawImage(BGS,0,0,800,400);
+ctx.drawImage(BGSimg,0,0,800,400);
 ctx.globalAlpha=1;
 }
 
@@ -1029,7 +1690,7 @@ var demo1ext = ""; var demo2ext = ""; var demo3ext = "";
 function outprint() {
 	if (guion==1){
 	//Demo 1 & 2
-	demo2ext="ctx.strokeRect(px+10-bx,py+10-by,pw-20,ph-20) " + " |ecurr: " + ecurr + " |ecurr2: " + ecurr2 + " |pywhenG: " + pywhenG + " |inboostrange: " + inboostrange;
+	demo2ext="edT: " + edT + "|| ctx.strokeRect(px+10-bx,py+10-by,pw-20,ph-20) " + " |ecurr: " + ecurr + " |ecurr2: " + ecurr2 + " |pywhenG: " + pywhenG + " |inboostrange: " + inboostrange;
 	demo1ext="|px: " + px + " |py: " + py + " |grounded: " + grounded + " |bx: " + bx.toFixed(1) + " |by: " + by.toFixed(1) + " |pdir: " + pdir;
 	document.getElementById("demo1").innerHTML = "|X: " + canvasX + "| Y: " + canvasY + "| Scene: " + scene; document.getElementById("demo1").innerHTML += demo1ext;
 	document.getElementById("demo2").innerHTML = ""; document.getElementById("demo2").innerHTML += demo2ext;
@@ -1145,6 +1806,16 @@ window.onkeydown = function(e) {
 var arrayInsert = "Array"; var aqc=0; var knodown=0;
 function checkKeyPressed(evt) {
 	if (scene=="EDIT"){
+		if (evt.keyCode == "16"){
+			for (let i = 0; i < 40; i++){
+				for (let z = 0; z < 20; z++){
+					if (canvasX>i*20&&canvasX<=i*20+20&&canvasY>z*20&&canvasY<=z*20+20){
+						lx=i+ebx/20; ly=z-13;
+						copytoclipboard(String(lx + "," + ly));
+					}
+				}
+			}
+		}
 		if (evt.keyCode == "76"){erot++; if (erot>1){erot=0;}}
 		if (evt.keyCode == "85"){einv+=2; if (einv>1){einv=-1;}}
 		if (evt.keyCode == "39"){ebxM+=100;}
@@ -1185,13 +1856,14 @@ function checkKeyPressed(evt) {
 	if (evt.keyCode == "32"){
 		if (scene == "M"){
 			spaceD=1;
-		    if (grounded==1){pjump=1; pjumpV=pjumpVI;}
+		    if (pmode=="cube"){if (grounded==1){pjump=1; pjumpV=pjumpVI;}}
+			 if (pmode=="ball"){if (grounded==1){pdir=pdir*-1;}}
 			demo3ext+=Math.round(px/42)-5 + ",";
 		}
 		if (scene=="START"){
 			if (pmusic==1){
 				myMusic = new sound("audio/track" + String(tracknum) + ".mp3");
-				myMusic.play();
+				myMusic.currentTime=0; myMusic.play(); 
 			}
 			scene="M";
 		}
@@ -1309,7 +1981,6 @@ function sound(src) {
 <source src="audio/track2.mp3" type="audio/mp3">
 <source src="audio/track3.mp3" type="audio/mp3">
 
-<img id="BGS" src="backgrounds/start.png" hidden></img>
 <img src="backgrounds/1.png" hidden></img>
 <img src="backgrounds/G1.png" hidden></img>
 <img src="backgrounds/2.png" hidden></img>
@@ -1326,7 +1997,14 @@ function sound(src) {
 <img id="p7" src="player/7.png" hidden></img>
 <img id="p8" src="player/8.png" hidden></img>
 
-<img id="lineglow" src="objects/deco/lineglow.png" hidden></img>
+<img id="pb1" src="player/ball/1.png" hidden></img>
+<img id="pb2" src="player/ball/2.png" hidden></img>
+<img id="pb3" src="player/ball/3.png" hidden></img>
+<img id="pb4" src="player/ball/4.png" hidden></img>
+<img id="pb5" src="player/ball/5.png" hidden></img>
+<img id="pb6" src="player/ball/6.png" hidden></img>
+
+
 <img id="eorbY" src="objects/orbY.png" hidden></img>
 <img src="objects/orbYUSED.png" hidden></img>
 <img id="eorbB" src="objects/orbB.png" hidden></img>
@@ -1346,10 +2024,12 @@ function sound(src) {
 <img id="objSU" src="objects/spikeU.png" hidden></img>
 <img id="objSSU" src="objects/sspikeU.png" hidden></img>
 
+<img id="eportalN" src="objects/portalN.png" hidden></img>
 <img id="eportalY" src="objects/portalY.png" hidden></img>
 <img id="eportalYU" src="objects/portalYU.png" hidden></img>
 <img id="eportalB" src="objects/portalB.png" hidden></img>
 <img id="eportalBU" src="objects/portalBU.png" hidden></img>
+<img id="eportalBA" src="objects/portalBA.png" hidden></img>
 
 <img id="egear" src="objects/gear/1.png" hidden></img>
 <img src="objects/gear/2.png" hidden></img>
@@ -1384,7 +2064,7 @@ function sound(src) {
 <img id="eplatLU" src="objects/platformLU.png" hidden></img>
 <img id="eplatRLU" src="objects/platformRLU.png" hidden></img>
 
-
+<img id="ecubeEXT" src="editor/cubeEXT.png" hidden></img>
 <img id="etab" src="editor/tab.png" hidden></img>
 <img id="etabC" src="editor/tabC.png" hidden></img>
 <img id="etabCR" src="editor/tabCR.png" hidden></img>
